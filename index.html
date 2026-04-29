@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raj Xerox App</title>
+
+<style>
+body{
+margin:0;
+padding:0;
+font-family:Arial,sans-serif;
+background:#0f172a;
+color:white;
+}
+
+.container{
+max-width:420px;
+margin:auto;
+padding:15px;
+}
+
+h1{
+text-align:center;
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+color:#38bdf8;
+}
+
+.box{
+background:#1e293b;
+padding:12px;
+border-radius:12px;
+margin-top:10px;
+}
+
+label{
+display:block;
+margin-top:10px;
+margin-bottom:5px;
+}
+
+input{
+width:100%;
+padding:10px;
+border:none;
+border-radius:8px;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.green{background:#22c55e;color:white;}
+.orange{background:#f59e0b;color:white;}
+.red{background:#ef4444;color:white;}
+.blue{background:#3b82f6;color:white;}
+
+.total{
+font-size:25px;
+text-align:center;
+margin-top:15px;
+color:#22c55e;
+font-weight:bold;
+}
+
+.item{
+background:#334155;
+padding:10px;
+border-radius:10px;
+margin-top:8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Raj Xerox App</h1>
+
+<div class="box">
+
+<label>Customer Name</label>
+<input type="text" id="name" placeholder="TYPE NAME">
+
+<label>Xerox ₹2</label>
+<input type="number" id="x2" placeholder="Qty">
+
+<label>Double Xerox ₹3</label>
+<input type="number" id="x3" placeholder="Qty">
+
+<label>Double Xerox ₹4</label>
+<input type="number" id="x4" placeholder="Qty">
+
+<label>Print Out ₹5</label>
+<input type="number" id="p5" placeholder="Qty">
+
+<label>Color Xerox ₹10</label>
+<input type="number" id="c10" placeholder="Qty">
+
+<label>Passport Photo 3 Copy ₹25</label>
+<input type="number" id="ph25" placeholder="Qty">
+
+<label>Passport Photo 6 Copy ₹40</label>
+<input type="number" id="ph40" placeholder="Qty">
+
+<div class="total">Total ₹<span id="total">0</span></div>
+
+<label>WhatsApp Number</label>
+<input type="text" id="phone" placeholder="91xxxxxxxxxx">
+
+<button class="green" onclick="sendBill()">Send WhatsApp Bill</button>
+
+<button class="blue" onclick="clearAll()">All Clear</button>
+
+<label>Due Amount</label>
+<input type="number" id="due">
+
+<button class="orange" onclick="saveDue()">Save Due</button>
+
+</div>
+
+<div class="box">
+<h3>Due List</h3>
+<div id="dueList"></div>
+
+</div>
+
+</div>
+
+<script>
+function g(id){
+return parseInt(document.getElementById(id).value)||0;
+}
+
+function calc(){
+let total=
+g("x2")*2+
+g("x3")*3+
+g("x4")*4+
+g("p5")*5+
+g("c10")*10+
+g("ph25")*25+
+g("ph40")*40;
+
+document.getElementById("total").innerText=total;
+return total;
+}
+
+document.querySelectorAll("input").forEach(e=>{
+e.oninput=calc;
+});
+
+function sendBill(){
+
+let phone=document.getElementById("phone").value;
+let name=document.getElementById("name").value || "Customer";
+let total=calc();
+
+/* Auto Amount Payment Link */
+let upi="upi://pay?pa=paytm.s1qu7fi@pty&pn=Raj Xerox&am="+total+"&cu=INR";
+
+let msg=
+"Raj Xerox App\n\n"+
+"Name: "+name+"\n"+
+"Total Bill: ₹"+total+"\n\n"+
+"Tap Payment Link:\n"+
+upi+"\n\n"+
+"UPI ID: paytm.s1qu7fi@pty";
+
+window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(msg));
+}
+
+function saveDue(){
+let name=document.getElementById("name").value;
+let due=document.getElementById("due").value;
+
+if(name==""||due==""){
+alert("Enter Name and Amount");
+return;
+}
+
+let arr=JSON.parse(localStorage.getItem("due"))||[];
+arr.push({name,due});
+localStorage.setItem("due",JSON.stringify(arr));
+showDue();
+}
+
+function showDue(){
+let arr=JSON.parse(localStorage.getItem("due"))||[];
+let html="";
+
+arr.forEach((a,i)=>{
+html+=`
+<div class="item">
+<span>${a.name} - ₹${a.due}</span>
+<button class="red" style="width:auto;padding:8px" onclick="del(${i})">Delete</button>
+</div>`;
+});
+
+document.getElementById("dueList").innerHTML=html;
+}
+
+function del(i){
+let arr=JSON.parse(localStorage.getItem("due"))||[];
+arr.splice(i,1);
+localStorage.setItem("due",JSON.stringify(arr));
+showDue();
+}
+
+function clearAll(){
+document.getElementById("name").value="";
+document.getElementById("x2").value="";
+document.getElementById("x3").value="";
+document.getElementById("x4").value="";
+document.getElementById("p5").value="";
+document.getElementById("c10").value="";
+document.getElementById("ph25").value="";
+document.getElementById("ph40").value="";
+document.getElementById("phone").value="";
+document.getElementById("due").value="";
+calc();
+}
+
+function clearDue(){
+localStorage.removeItem("due");
+showDue();
+}
+
+calc();
+showDue();
+</script>
+
+</body>
+</html>
